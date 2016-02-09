@@ -19,6 +19,7 @@
 namespace MetaModels\Attribute\Longtext;
 
 use MetaModels\Attribute\BaseSimple;
+use MetaModels\Helper\TableManipulation;
 
 /**
  * This is the MetaModelAttribute class for handling long text fields.
@@ -29,12 +30,30 @@ use MetaModels\Attribute\BaseSimple;
  */
 class Longtext extends BaseSimple
 {
+    
+
     /**
      * {@inheritDoc}
      */
     public function getSQLDataType()
     {
         return 'text NULL';
+    }
+
+    /**
+     * @{inheritDoc}
+     *
+     * add a fulltext-index to column after creation
+     */
+    public function createColumn()
+    {
+        parent::createColumn();
+
+        TableManipulation::addIndex(
+                $this->getMetaModel()->getTableName(),
+                'FULLTEXT',
+                $this->getColName()
+        );
     }
 
     /**

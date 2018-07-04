@@ -1,1 +1,1 @@
-<span class="text"><?php echo $this->raw; ?></span>
+<span class="text"><?= \StringUtil::encodeEmail($this->raw) ?></span>

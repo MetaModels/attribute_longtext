@@ -69,4 +69,14 @@ class Longtext extends BaseSimple
 
         return $arrFieldDef;
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * This is needed for compatibility with MySQL strict mode.
+     */
+    public function serializeData($value)
+    {
+        return $value === '' ? null : $value;
+    }
 }

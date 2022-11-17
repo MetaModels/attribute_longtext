@@ -35,6 +35,12 @@ use MetaModels\IMetaModel;
  */
 class LongtextTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        $GLOBALS['TL_LANGUAGE'] = 'en';
+        parent::setUp();
+    }
+
     /**
      * Mock a MetaModel.
      *

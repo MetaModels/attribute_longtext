@@ -2,4 +2,4 @@
 
 use Contao\System;
 
-echo System::getContainer()->get('contao.string.html_decoder')->htmlToPlainText($this->raw);
+echo System::getContainer()->get('contao.string.html_decoder')->htmlToPlainText($this->raw ?? '');

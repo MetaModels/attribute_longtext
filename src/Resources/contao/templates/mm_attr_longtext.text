@@ -1,1 +1,5 @@
-<?php echo $this->raw; ?>
+<?php
+
+use Contao\System;
+
+echo System::getContainer()->get('contao.string.html_decoder')->htmlToPlainText($this->raw);

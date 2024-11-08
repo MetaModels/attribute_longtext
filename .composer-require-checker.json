@@ -6,11 +6,11 @@
     "Contao\\ManagerPlugin\\Bundle\\Config\\BundleConfig",
     "Contao\\ManagerPlugin\\Bundle\\Parser\\ParserInterface",
     "Contao\\ManagerPlugin\\Routing\\RoutingPluginInterface",
-    "Doctrine\\Bundle\\DoctrineBundle\\DoctrineBundle",
-    "Doctrine\\DBAL\\Connection", "Doctrine\\DBAL\\Schema\\Table",
-    "Doctrine\\DBAL\\Types\\Types",
     "MetaModels\\ContaoFrontendEditingBundle\\MetaModelsContaoFrontendEditingBundle",
-    "Symfony\\Component\\Config\\FileLocator",
-    "tl_user_group"
+    "InspiredMinds\\ContaoFileUsage\\Provider\\FileUsageProviderInterface",
+    "InspiredMinds\\ContaoFileUsage\\Result\\FileTreeMultipleResult",
+    "InspiredMinds\\ContaoFileUsage\\Result\\FileTreeSingleResult",
+    "InspiredMinds\\ContaoFileUsage\\Result\\ResultInterface",
+    "InspiredMinds\\ContaoFileUsage\\Result\\ResultsCollection"
   ]
 }

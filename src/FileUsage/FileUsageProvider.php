@@ -19,8 +19,10 @@
 
 namespace MetaModels\AttributeLongtextBundle\FileUsage;
 
-use Contao\CoreBundle\Csrf\ContaoCsrfTokenManager;
 use ContaoCommunityAlliance\DcGeneral\Data\ModelId;
+use Contao\CoreBundle\Csrf\ContaoCsrfTokenManager;
+use Contao\FilesModel;
+use Contao\StringUtil;
 use InspiredMinds\ContaoFileUsage\Provider\FileUsageProviderInterface;
 use InspiredMinds\ContaoFileUsage\Result\ResultInterface;
 use InspiredMinds\ContaoFileUsage\Result\ResultsCollection;
@@ -30,6 +32,11 @@ use MetaModels\IFactory;
 use MetaModels\IMetaModel;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
+use function preg_match_all;
+use function preg_quote;
+use function str_replace;
+use function urldecode;
 
 /**
  * This class supports the Contao extension 'file usage'.
@@ -42,6 +49,8 @@ class FileUsageProvider implements FileUsageProviderInterface
     private const INSERT_TAG_PATTERN = '~{{(file|picture|figure)::([a-f0-9]{8}-[a-f0-9]{4}-1[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12})(([|?])[^}]+)?}}~';
     // phpcs:enable
 
+    private string $pathPattern = '~(href|src)\s*=\s*"(__contao_upload_path__/.+?)([?"])~';
+
     private string $refererId = '';
 
     public function __construct(
@@ -50,7 +59,9 @@ class FileUsageProvider implements FileUsageProviderInterface
         private readonly RequestStack $requestStack,
         private readonly ContaoCsrfTokenManager $csrfTokenManager,
         private readonly string $csrfTokenName,
+        string $uploadPath,
     ) {
+        $this->pathPattern = str_replace('__contao_upload_path__', preg_quote($uploadPath, '~'), $this->pathPattern);
     }
 
     public function find(): ResultsCollection
@@ -67,6 +78,9 @@ class FileUsageProvider implements FileUsageProviderInterface
         return $collection;
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     */
     private function processTable(string $table): ResultsCollection
     {
         $collection = new ResultsCollection();
@@ -87,12 +101,28 @@ class FileUsageProvider implements FileUsageProviderInterface
                 if (empty($text = $item->get($attributeColumn))) {
                     continue;
                 }
-                \preg_match_all(self::INSERT_TAG_PATTERN, $text, $matches);
+
+                preg_match_all(self::INSERT_TAG_PATTERN, $text, $matches);
                 foreach ($matches[2] ?? [] as $uuid) {
                     $collection->addResult(
                         $uuid,
                         $this->createFileResult($table, $attributeColumn, $item->get('id'))
                     );
+                }
+
+                if ('' !== $this->pathPattern && false !== preg_match_all($this->pathPattern, $text, $matches)) {
+                    foreach ($matches[2] ?? [] as $path) {
+                        $file = FilesModel::findByPath(urldecode($path));
+
+                        if (null === $file || null === $file->uuid) {
+                            continue;
+                        }
+
+                        $collection->addResult(
+                            StringUtil::binToUuid($file->uuid),
+                            $this->createFileResult($table, $attributeColumn, $item->get('id'))
+                        );
+                    }
                 }
             }
         }
